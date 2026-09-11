@@ -2,330 +2,57 @@ import React, { useEffect, useState } from "react";
 import { Button } from "antd";
 import { Pause, Play, RotateCcw } from "lucide-react";
 import { useLanguage, localized } from "./i18n";
+import ChapterGraphic from "./ChapterVisual";
 const bi = (zh, en) => ({ zh, en });
-const stageConfig = {
-  "box-model": {
-    cells: 1,
-    steps: [
-      {
-        caption: bi("外边距", "Margin"),
-        container: {
-          padding: 28,
-          border: "4px solid #d99c6a",
-          background: "#f8e8d3",
-        },
-        cell: { background: "#bad4c0", padding: 18 },
-      },
-      {
-        caption: bi("边框", "Border"),
-        container: {
-          padding: 18,
-          border: "10px solid #d99c6a",
-          background: "#f8e8d3",
-        },
-        cell: { background: "#bad4c0", padding: 14 },
-      },
-      {
-        caption: bi("内边距", "Padding"),
-        container: {
-          padding: 34,
-          border: "4px solid #d99c6a",
-          background: "#f8e8d3",
-        },
-        cell: { background: "#bad4c0", padding: 26 },
-      },
-      {
-        caption: bi("内容区", "Content"),
-        container: {
-          padding: 10,
-          border: "4px solid #d99c6a",
-          background: "#f8e8d3",
-        },
-        cell: { background: "#bad4c0", padding: 8 },
-      },
-    ],
-  },
-  flow: {
-    cells: 6,
-    steps: [
-      {
-        caption: bi("块级排列", "Block flow"),
-        container: { display: "block" },
-        cell: { display: "block", width: "100%", marginBottom: 6 },
-      },
-      {
-        caption: bi("行内块", "Inline block"),
-        container: { display: "block" },
-        cell: { display: "inline-block", width: "30%", marginRight: 6 },
-      },
-      {
-        caption: bi("行内", "Inline"),
-        container: { display: "block" },
-        cell: { display: "inline", width: "auto", marginRight: 8 },
-      },
-      {
-        caption: bi("隐藏与占位", "Hidden but present"),
-        container: { display: "block" },
-        cell: {
-          display: "inline-block",
-          width: "30%",
-          marginRight: 6,
-          opacity: 0.25,
-        },
-      },
-    ],
-  },
-  position: {
-    cells: 2,
-    steps: [
-      {
-        caption: bi("普通流", "Normal flow"),
-        container: { position: "relative", minHeight: 150 },
-        cell: { display: "inline-block", width: 90, height: 60, margin: 8 },
-      },
-      {
-        caption: bi("相对定位", "Relative"),
-        container: { position: "relative", minHeight: 150 },
-        cell: {
-          display: "inline-block",
-          width: 90,
-          height: 60,
-          margin: 8,
-          top: 18,
-          left: 18,
-          position: "relative",
-        },
-      },
-      {
-        caption: bi("绝对定位", "Absolute"),
-        container: { position: "relative", minHeight: 150 },
-        cell: {
-          display: "inline-block",
-          width: 90,
-          height: 60,
-          position: "absolute",
-          top: 34,
-          left: 44,
-        },
-      },
-      {
-        caption: bi("层叠上下文", "Stacking"),
-        container: { position: "relative", minHeight: 150 },
-        cell: {
-          display: "inline-block",
-          width: 90,
-          height: 60,
-          position: "absolute",
-          top: 22,
-          left: 72,
-          zIndex: 2,
-        },
-      },
-    ],
-  },
-  flex: {
-    cells: 6,
-    steps: [
-      {
-        caption: bi("主轴：行", "Main axis: row"),
-        container: { display: "flex", flexDirection: "row", gap: 10 },
-        cell: { flex: "0 0 22%" },
-      },
-      {
-        caption: bi("主轴：列", "Main axis: column"),
-        container: { display: "flex", flexDirection: "column", gap: 10 },
-        cell: { flex: "0 0 auto", height: 30 },
-      },
-      {
-        caption: bi("两端对齐", "Space between"),
-        container: {
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          gap: 10,
-        },
-        cell: { flex: "0 0 18%" },
-      },
-      {
-        caption: bi("间距变化", "Gap changes"),
-        container: {
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "center",
-          gap: 28,
-        },
-        cell: { flex: "0 0 16%" },
-      },
-    ],
-  },
-  grid: {
-    cells: 6,
-    steps: [
-      {
-        caption: bi("单列", "One column"),
-        container: { display: "grid", gridTemplateColumns: "1fr", gap: 10 },
-        cell: {},
-      },
-      {
-        caption: bi("两列", "Two columns"),
-        container: {
-          display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
-          gap: 10,
-        },
-        cell: {},
-      },
-      {
-        caption: bi("三列", "Three columns"),
-        container: {
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: 10,
-        },
-        cell: {},
-      },
-      {
-        caption: bi("间距扩大", "Larger gap"),
-        container: {
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: 24,
-        },
-        cell: {},
-      },
-    ],
-  },
-  responsive: {
-    cells: 6,
-    steps: [
-      {
-        caption: bi("手机视口", "Phone viewport"),
-        container: {
-          display: "grid",
-          gridTemplateColumns: "1fr",
-          gap: 8,
-          width: "70%",
-        },
-        cell: {},
-      },
-      {
-        caption: bi("平板视口", "Tablet viewport"),
-        container: {
-          display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
-          gap: 12,
-          width: "85%",
-        },
-        cell: {},
-      },
-      {
-        caption: bi("桌面视口", "Desktop viewport"),
-        container: {
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: 16,
-          width: "100%",
-        },
-        cell: {},
-      },
-      {
-        caption: bi("宽屏视口", "Wide viewport"),
-        container: {
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: 20,
-          width: "100%",
-        },
-        cell: {},
-      },
-    ],
-  },
-  patterns: {
-    cells: 4,
-    steps: [
-      {
-        caption: bi("语义结构", "Semantic structure"),
-        container: {
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gridTemplateRows: "40px 1fr 40px",
-          gap: 8,
-        },
-        cell: {},
-      },
-      {
-        caption: bi("侧栏在左", "Sidebar left"),
-        container: {
-          display: "grid",
-          gridTemplateColumns: "160px 1fr",
-          gridTemplateRows: "40px 1fr 40px",
-          gap: 8,
-        },
-        cell: {},
-      },
-      {
-        caption: bi("侧栏在右", "Sidebar right"),
-        container: {
-          display: "grid",
-          gridTemplateColumns: "1fr 160px",
-          gridTemplateRows: "40px 1fr 40px",
-          gap: 8,
-        },
-        cell: {},
-      },
-      {
-        caption: bi("小屏重排", "Small-screen stack"),
-        container: {
-          display: "grid",
-          gridTemplateColumns: "1fr",
-          gridTemplateRows: "40px 1fr 1fr 40px",
-          gap: 8,
-        },
-        cell: {},
-      },
-    ],
-  },
-  project: {
-    cells: 6,
-    steps: [
-      {
-        caption: bi("自动列数", "Auto columns"),
-        container: {
-          display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
-          gap: 10,
-        },
-        cell: { aspectRatio: "4 / 3" },
-      },
-      {
-        caption: bi("最小宽度", "Minimum width"),
-        container: {
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: 12,
-        },
-        cell: { aspectRatio: "4 / 3" },
-      },
-      {
-        caption: bi("弹性轨道", "Flexible tracks"),
-        container: {
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: 16,
-        },
-        cell: { aspectRatio: "4 / 3" },
-      },
-      {
-        caption: bi("画廊节奏", "Gallery rhythm"),
-        container: {
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
-          gap: 18,
-        },
-        cell: { aspectRatio: "4 / 3" },
-      },
-    ],
-  },
+const captions = {
+  "box-model": [
+    bi("外边距与边框", "Margin and border"),
+    bi("切换盒模型", "Switch box sizing"),
+    bi("内边距空间", "Padding space"),
+    bi("内容区域", "Content area"),
+  ],
+  flow: [
+    bi("块级排列", "Block flow"),
+    bi("行内块排列", "Inline-block flow"),
+    bi("行内文本流", "Inline text flow"),
+    bi("隐藏后的回流", "Hidden and reflow"),
+  ],
+  position: [
+    bi("确定参照系", "Set the reference"),
+    bi("相对偏移", "Relative offset"),
+    bi("绝对定位", "Absolute positioning"),
+    bi("包含块关系", "Containing block"),
+  ],
+  flex: [
+    bi("主轴方向", "Main axis"),
+    bi("交叉轴对齐", "Cross axis"),
+    bi("剩余空间分配", "Free-space distribution"),
+    bi("间距与换行", "Gap and wrapping"),
+  ],
+  grid: [
+    bi("一列轨道", "One track"),
+    bi("两列轨道", "Two tracks"),
+    bi("三列轨道", "Three tracks"),
+    bi("间距不是轨道", "Gap is not a track"),
+  ],
+  responsive: [
+    bi("手机视口", "Phone viewport"),
+    bi("平板视口", "Tablet viewport"),
+    bi("桌面视口", "Desktop viewport"),
+    bi("内容决定断点", "Content decides breakpoints"),
+  ],
+  patterns: [
+    bi("页面骨架", "Page skeleton"),
+    bi("侧栏在左", "Sidebar left"),
+    bi("侧栏在右", "Sidebar right"),
+    bi("小屏重排", "Small-screen reflow"),
+  ],
+  project: [
+    bi("自动适配列数", "Auto columns"),
+    bi("限制最小宽度", "Minimum width"),
+    bi("弹性轨道", "Flexible tracks"),
+    bi("保持视觉节奏", "Keep visual rhythm"),
+  ],
 };
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -355,29 +82,20 @@ export default function DynamicStage({
     const id = setInterval(() => setStep((current) => (current + 1) % 4), 2600);
     return () => clearInterval(id);
   }, [playing, reducedMotion]);
-  const config = stageConfig[chapter.id] ?? stageConfig.grid;
-  const current = config.steps[step];
+  const steps = captions[chapter.id] ?? captions.grid;
   return (
     <section
       className={"dynamic-stage" + (compact ? " compact" : "")}
-      aria-label={localized(
-        {
-          zh: chapter.title.zh + "动态布局演示",
-          en: chapter.title.en + " layout motion",
-        },
-        lang,
-      )}
+      aria-label={
+        lang === "en"
+          ? chapter.title.en + " layout motion"
+          : chapter.title.zh + "动态布局演示"
+      }
     >
-      <div className="stage-frame" style={current.container}>
-        {Array.from({ length: config.cells }, (_, index) => (
-          <span key={index} className="stage-cell" style={current.cell}>
-            {index + 1}
-          </span>
-        ))}
-      </div>
+      <ChapterGraphic chapter={chapter} step={step} />
       {!background && (
         <div className="stage-caption">
-          <span>{localized(current.caption, lang)}</span>
+          <span>{localized(steps[step], lang)}</span>
           <div className="stage-controls">
             <Button
               size="small"
@@ -403,7 +121,7 @@ export default function DynamicStage({
       )}
       {!background && (
         <div className="stage-indicators" aria-hidden="true">
-          {config.steps.map((_, index) => (
+          {steps.map((_, index) => (
             <i key={index} className={index === step ? "active" : ""} />
           ))}
         </div>

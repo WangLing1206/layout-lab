@@ -51,10 +51,10 @@ export const chapters = [
         "For content-box, total width = width + left/right padding + left/right border. border-box includes padding and border in width. Margin is not included in either width.",
       ),
       concept(
-        "外边距折叠",
-        "Margin collapsing",
-        "普通块级元素上下外边距可能折叠，而不是相加。Flex 和 Grid 容器内的子项外边距不折叠。",
-        "Vertical margins between block-level elements may collapse rather than add. Flex and Grid items do not collapse margins.",
+        "切换盒模型",
+        "Switching box sizing",
+        "content-box 的 width 只表示内容区；border-box 的 width 包含 padding 和 border，修改盒模型会直接改变内容区大小。",
+        "With content-box, width measures only the content area. With border-box, width includes padding and border, so switching changes the content area size.",
       ),
     ],
     tip: bi(
@@ -179,10 +179,10 @@ export const chapters = [
         "absolute leaves normal flow and usually positions against the nearest non-static ancestor; otherwise it uses the initial containing block.",
       ),
       concept(
-        "层叠上下文",
-        "Stacking context",
-        "z-index 不是全局排名。transform、opacity 小于 1 等属性也可能建立层叠上下文，后代不能任意跨越父级的层叠顺序。",
-        "z-index is not a global ranking. transform and opacity below 1 can also create stacking contexts; descendants cannot freely cross their parent’s stacking order.",
+        "偏移与包含块",
+        "Offsets and containing block",
+        "top、left 等偏移属性相对于包含块计算。absolute 元素会寻找最近的非 static 定位祖先，relative 元素仍保留自己的原位置。",
+        "Offsets such as top and left resolve against the containing block. An absolute element looks for the nearest non-static ancestor, while a relative element keeps its original space.",
       ),
     ],
     tip: bi(
@@ -305,10 +305,10 @@ export const chapters = [
         "fr represents one share of available space. repeat(3, 1fr) creates three equal tracks; gap is deducted first.",
       ),
       concept(
-        "跨行与跨列",
-        "Spanning cells",
-        "grid-column: span 2 使项目跨越两列。minmax(0, 1fr) 可以避免长内容的最小尺寸挤宽轨道。",
-        "grid-column: span 2 makes an item cross two columns. minmax(0, 1fr) prevents long content from forcing tracks wider.",
+        "轨道与最小尺寸",
+        "Tracks and minimum size",
+        "轨道由网格线定义，fr 分配剩余空间。minmax(0, 1fr) 可以避免长内容的最小尺寸挤宽轨道。",
+        "Tracks are defined by grid lines, and fr distributes remaining space. minmax(0, 1fr) prevents long content from forcing tracks wider.",
       ),
     ],
     tip: bi(

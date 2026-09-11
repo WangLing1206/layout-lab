@@ -22,14 +22,14 @@ it("advances, pauses, and replays layout motion", () => {
       <DynamicStage chapter={getChapter("grid")} />
     </LanguageContext.Provider>,
   );
-  expect(screen.getByText("单列")).toBeTruthy();
+  expect(screen.getByText("一列轨道")).toBeTruthy();
   act(() => vi.advanceTimersByTime(2600));
-  expect(screen.getByText("两列")).toBeTruthy();
+  expect(screen.getByText("两列轨道")).toBeTruthy();
   fireEvent.click(screen.getByLabelText("暂停动画"));
   act(() => vi.advanceTimersByTime(5200));
-  expect(screen.getByText("两列")).toBeTruthy();
+  expect(screen.getByText("两列轨道")).toBeTruthy();
   fireEvent.click(screen.getByLabelText("重新播放"));
-  expect(screen.getByText("单列")).toBeTruthy();
+  expect(screen.getByText("一列轨道")).toBeTruthy();
 });
 it("uses English captions after switching language", () => {
   render(
@@ -37,6 +37,6 @@ it("uses English captions after switching language", () => {
       <DynamicStage chapter={getChapter("grid")} />
     </LanguageContext.Provider>,
   );
-  expect(screen.getByText("One column")).toBeTruthy();
+  expect(screen.getByText("One track")).toBeTruthy();
   expect(screen.getByLabelText("Pause animation")).toBeTruthy();
 });

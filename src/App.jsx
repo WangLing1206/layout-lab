@@ -9,7 +9,7 @@ import {
   useLocation,
   useSearchParams,
 } from "react-router-dom";
-import { Button, Input, Segmented, Progress, Tooltip, message } from "antd";
+import { Button, Input, Segmented, Progress, message } from "antd";
 import {
   PanelsTopLeft,
   ArrowUpRight,
@@ -23,8 +23,9 @@ import {
   CheckCircle2,
   ChevronRight,
   Layers,
-  Copy,
   GraduationCap,
+  Eye,
+  TriangleAlert,
 } from "lucide-react";
 import {
   chapters,
@@ -36,6 +37,9 @@ import {
 import Lab, { copyText } from "./Lab";
 import { PracticeList, PracticeDetail } from "./Practice";
 import DynamicStage from "./Stage";
+import ChapterGraphic from "./ChapterVisual";
+import CodeBlock from "./CodeBlock";
+import { getKnowledgeDetail } from "./knowledge";
 import {
   LanguageContext,
   getInitialLanguage,
@@ -44,6 +48,7 @@ import {
 } from "./i18n";
 const ProgressContext = createContext([]);
 const num = (i) => String(i + 1).padStart(2, "0");
+const chapterFilename = (id, type) => id + (type === "CSS" ? ".css" : ".html");
 const copy = {
   zh: {
     brand: "页面布局课堂",
@@ -199,15 +204,7 @@ export function Diagram({ chapter, large = false }) {
       }
       style={{ "--accent": chapter.color }}
     >
-      <div className="diagram-stage">
-        {Array.from({ length: chapter.id === "box-model" ? 3 : 6 }, (_, i) => (
-          <span key={i}>
-            {chapter.id === "box-model"
-              ? ["margin", "padding", "content"][i]
-              : num(i)}
-          </span>
-        ))}
-      </div>
+      <ChapterGraphic chapter={chapter} />
       <small>{chapter.tags[0]}</small>
     </div>
   );
@@ -570,16 +567,51 @@ function Knowledge() {
       <span className="eyebrow">{t.knowledge}</span>
       <h2>{localized(c.heading, lang)}</h2>
       <p className="lead">{localized(c.intro, lang)}</p>
+      <div className="knowledge-focus">
+        <span>
+          {lang === "en" ? "Connected demo controls" : "对应实验参数"}
+        </span>
+        <div>
+          {c.controls.map((control) => (
+            <code key={control.key}>{localized(control.label, lang)}</code>
+          ))}
+        </div>
+      </div>
       <DynamicStage chapter={c} />
-      {c.concepts.map((item, i) => (
-        <section className="concept" key={item.title.zh}>
-          <span>{num(i)}</span>
-          <div>
-            <h3>{localized(item.title, lang)}</h3>
-            <p>{localized(item.text, lang)}</p>
-          </div>
-        </section>
-      ))}
+      {c.concepts.map((item, i) => {
+        const detail = getKnowledgeDetail(c.id, i);
+        return (
+          <section className="concept concept-rich" key={item.title.zh}>
+            <div className="concept-heading">
+              <span>{num(i)}</span>
+              <div>
+                <h3>{localized(item.title, lang)}</h3>
+                <p>{localized(item.text, lang)}</p>
+              </div>
+            </div>
+            <div className="concept-details">
+              <div className="concept-detail observe">
+                <Eye size={17} />
+                <div>
+                  <strong>
+                    {lang === "en" ? "Observe in the demo" : "在演示中观察"}
+                  </strong>
+                  <p>{localized(detail.observe, lang)}</p>
+                </div>
+              </div>
+              <div className="concept-detail caution">
+                <TriangleAlert size={17} />
+                <div>
+                  <strong>
+                    {lang === "en" ? "Common mistake" : "常见误区"}
+                  </strong>
+                  <p>{localized(detail.caution, lang)}</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      })}
       <aside className="learning-note">
         <BookOpen size={21} />
         <div>
@@ -587,10 +619,16 @@ function Knowledge() {
           <p>{localized(c.tip, lang)}</p>
         </div>
       </aside>
-      <Link className="primary-link" to={"/course/" + id + "/code"}>
-        {lang === "en" ? "See it in code" : "看看代码如何实现"}
-        <ArrowRight size={17} />
-      </Link>
+      <div className="knowledge-actions">
+        <Link className="primary-link" to={"/course/" + id + "/code"}>
+          {lang === "en" ? "See it in code" : "看看代码如何实现"}
+          <Code2 size={17} />
+        </Link>
+        <Link className="secondary-link" to={"/course/" + id + "/demo"}>
+          {lang === "en" ? "Open the matching demo" : "打开对应实验"}
+          <FlaskConical size={17} />
+        </Link>
+      </div>
     </article>
   );
 }
@@ -625,30 +663,50 @@ function CodePage() {
           ]}
         />
       </div>
-      <div className="code-window">
-        <div className="code-bar">
-          <Segmented
-            value={type}
-            onChange={setType}
-            options={["CSS", "HTML"]}
-          />
-          <Tooltip title={t.copyCode}>
-            <Button
-              aria-label={t.copyCode}
-              type="text"
-              icon={<Copy size={16} />}
-              onClick={() => copyText(code, lang)}
-            />
-          </Tooltip>
-        </div>
-        <pre>
-          {code.split("\n").map((line, i) => (
-            <div className="code-line" key={i}>
-              <span>{i + 1}</span>
-              <code>{line || " "}</code>
-            </div>
-          ))}
-        </pre>
+      <CodeBlock
+        code={code}
+        language={type === "CSS" ? "css" : "markup"}
+        filename={chapterFilename(c.id, type)}
+        copyLabel={t.copyCode}
+        onCopy={() => copyText(code, lang)}
+      />
+      <div className="code-reading">
+        <article>
+          <span>01</span>
+          <div>
+            <strong>{lang === "en" ? "Container rule" : "容器规则"}</strong>
+            <p>
+              {lang === "en"
+                ? "The first rule controls how children are arranged or positioned."
+                : "第一条规则决定子元素如何排列或定位。"}
+            </p>
+          </div>
+        </article>
+        <article>
+          <span>02</span>
+          <div>
+            <strong>{lang === "en" ? "Linked parameter" : "关联参数"}</strong>
+            <p>
+              {localized(c.controls[0].label, lang)}
+              {lang === "en"
+                ? " changes the highlighted declaration in the live demo."
+                : " 会直接改变实时演示中的对应声明。"}
+            </p>
+          </div>
+        </article>
+        <article>
+          <span>03</span>
+          <div>
+            <strong>
+              {lang === "en" ? "Try it in the demo" : "到实验中验证"}
+            </strong>
+            <p>
+              {lang === "en"
+                ? "Compare the basic and changed examples before editing the code."
+                : "先比较基础和变化示例，再进入编辑器自由修改。"}
+            </p>
+          </div>
+        </article>
       </div>
       <div className="code-explanation">
         <span className="eyebrow">RESULT</span>
