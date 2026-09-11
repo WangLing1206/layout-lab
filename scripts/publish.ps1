@@ -50,8 +50,14 @@ if ($Remotes -contains 'origin') {
     Invoke-Checked 'gh' @('repo','create',$Repository,'--public','--source','.','--remote','origin')
 }
 Invoke-Checked 'git' @('push','-u','origin','main')
-$Pages = & gh api "repos/$Repository/pages" 2>&1
-$PagesExit = $LASTEXITCODE
+$PreviousErrorPreference = $ErrorActionPreference
+try {
+    $ErrorActionPreference = 'Continue'
+    $Pages = & gh api "repos/$Repository/pages" 2>&1
+    $PagesExit = $LASTEXITCODE
+} finally {
+    $ErrorActionPreference = $PreviousErrorPreference
+}
 if ($PagesExit -eq 0) {
     Invoke-Checked 'gh' @('api','--method','PUT',"repos/$Repository/pages",'-f','build_type=workflow')
 } elseif (($Pages | Out-String) -match '404') {
