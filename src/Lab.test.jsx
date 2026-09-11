@@ -7,7 +7,7 @@ afterEach(cleanup);
 it("updates preview from CSS editing and resets", () => {
   render(<Lab chapter={getChapter("grid")} />);
   fireEvent.click(screen.getByRole("button", { name: "编辑代码" }));
-  fireEvent.change(screen.getByLabelText("CSS 编辑器"), {
+  fireEvent.change(screen.getByLabelText("CSS editor"), {
     target: { value: ".stage {display: block;}" },
   });
   expect(screen.getByTitle("实时布局预览").getAttribute("srcdoc")).toContain(

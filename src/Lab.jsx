@@ -11,24 +11,71 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { defaults, makeCss, documentFor } from "./course";
-export async function copyText(text) {
+import { localized, useLanguage } from "./i18n";
+const copy = {
+  zh: {
+    playground: "LIVE PLAYGROUND",
+    title: "让布局动起来",
+    live: "实时预览",
+    reset: "重置实验",
+    edit: "编辑代码",
+    close: "收起代码",
+    copy: "复制完整 HTML",
+    copied: "已复制到剪贴板",
+    copyFailed: "剪贴板不可用，请在编辑器中选择并复制代码",
+    download: "下载实验",
+    preview: "实时布局预览",
+    viewport: "预览宽度",
+    phone: "手机 360px",
+    tablet: "平板 768px",
+    full: "适应宽度",
+    autoViewport: "自适应视口",
+    pxViewport: "px 视口",
+    parameterMode: "参数模式",
+    customMode: "自定义 CSS",
+  },
+  en: {
+    playground: "LIVE PLAYGROUND",
+    title: "Make layout move",
+    live: "Live preview",
+    reset: "Reset demo",
+    edit: "Edit code",
+    close: "Close code",
+    copy: "Copy full HTML",
+    copied: "Copied to clipboard",
+    copyFailed: "Clipboard unavailable. Select and copy from the editor.",
+    download: "Download demo",
+    preview: "Live layout preview",
+    viewport: "Preview width",
+    phone: "Phone 360px",
+    tablet: "Tablet 768px",
+    full: "Fit width",
+    autoViewport: "Responsive viewport",
+    pxViewport: "px viewport",
+    parameterMode: "Parameter mode",
+    customMode: "Custom CSS",
+  },
+};
+export async function copyText(text, lang = "zh") {
   try {
     await navigator.clipboard.writeText(text);
-    message.success("已复制到剪贴板");
+    message.success(copy[lang].copied);
   } catch {
-    message.warning("剪贴板不可用，请在编辑器中选择并复制代码");
+    message.warning(copy[lang].copyFailed);
   }
 }
 export default function Lab({ chapter }) {
+  const { lang } = useLanguage();
+  const t = copy[lang];
   const [values, setValues] = useState(() => defaults(chapter));
   const [html, setHtml] = useState(chapter.html);
   const [custom, setCustom] = useState(null);
   const [editor, setEditor] = useState(false);
   const [viewport, setViewport] = useState("full");
   const css = custom ?? makeCss(chapter, values);
-  const source = documentFor(html, css);
+  const source = documentFor(html, css, lang);
   const change = (key, value) => {
-    setValues((v) => ({ ...v, [key]: value }));
+    setValues((current) => ({ ...current, [key]: value }));
     setCustom(null);
   };
   const reset = () => {
@@ -48,49 +95,52 @@ export default function Lab({ chapter }) {
     <section className="lab">
       <div className="section-heading">
         <div>
-          <span className="eyebrow">LIVE PLAYGROUND</span>
-          <h2>让布局动起来</h2>
-          <p>{chapter.tip}</p>
+          <span className="eyebrow">{t.playground}</span>
+          <h2>{t.title}</h2>
+          <p>{localized(chapter.tip, lang)}</p>
         </div>
         <span className="live-indicator">
           <i />
-          实时预览
+          {t.live}
         </span>
       </div>
       <div className="lab-controls">
         <SlidersHorizontal size={18} />
-        {chapter.controls.map((p) => (
-          <div className="parameter" key={p.key}>
-            <label id={"label-" + p.key}>
-              {p.label}
-              {!p.options && (
+        {chapter.controls.map((parameter) => (
+          <div className="parameter" key={parameter.key}>
+            <label id={"label-" + parameter.key}>
+              {localized(parameter.label, lang)}
+              {!parameter.options && (
                 <span>
-                  {values[p.key]}
-                  {p.key === "columns" ? "" : "px"}
+                  {values[parameter.key]}
+                  {parameter.key === "columns" ? "" : "px"}
                 </span>
               )}
             </label>
-            {p.options ? (
+            {parameter.options ? (
               <Select
-                aria-labelledby={"label-" + p.key}
-                value={values[p.key]}
-                options={p.options.map((value) => ({ value, label: value }))}
-                onChange={(v) => change(p.key, v)}
+                aria-labelledby={"label-" + parameter.key}
+                value={values[parameter.key]}
+                options={parameter.options.map((value) => ({
+                  value,
+                  label: value,
+                }))}
+                onChange={(value) => change(parameter.key, value)}
               />
             ) : (
               <Slider
-                ariaLabelForHandle={p.label}
-                min={p.min}
-                max={p.max}
-                value={values[p.key]}
-                onChange={(v) => change(p.key, v)}
+                ariaLabelForHandle={localized(parameter.label, lang)}
+                min={parameter.min}
+                max={parameter.max}
+                value={values[parameter.key]}
+                onChange={(value) => change(parameter.key, value)}
               />
             )}
           </div>
         ))}
-        <Tooltip title="重置实验">
+        <Tooltip title={t.reset}>
           <Button
-            aria-label="重置实验"
+            aria-label={t.reset}
             icon={<RotateCcw size={17} />}
             onClick={reset}
           />
@@ -105,31 +155,31 @@ export default function Lab({ chapter }) {
           </div>
           <span>{chapter.id}.html</span>
           <Segmented
-            aria-label="预览宽度"
+            aria-label={t.viewport}
             value={viewport}
             onChange={setViewport}
             options={[
               {
                 value: "360",
                 label: (
-                  <Tooltip title="手机 360px">
-                    <Smartphone size={16} aria-label="手机 360px" />
+                  <Tooltip title={t.phone}>
+                    <Smartphone size={16} aria-label={t.phone} />
                   </Tooltip>
                 ),
               },
               {
                 value: "768",
                 label: (
-                  <Tooltip title="平板 768px">
-                    <Tablet size={16} aria-label="平板 768px" />
+                  <Tooltip title={t.tablet}>
+                    <Tablet size={16} aria-label={t.tablet} />
                   </Tooltip>
                 ),
               },
               {
                 value: "full",
                 label: (
-                  <Tooltip title="适应宽度">
-                    <Monitor size={16} aria-label="适应宽度" />
+                  <Tooltip title={t.full}>
+                    <Monitor size={16} aria-label={t.full} />
                   </Tooltip>
                 ),
               },
@@ -138,7 +188,7 @@ export default function Lab({ chapter }) {
         </div>
         <div className="preview-canvas">
           <iframe
-            title="实时布局预览"
+            title={t.preview}
             sandbox=""
             srcDoc={source}
             style={{ width: viewport === "full" ? "100%" : Number(viewport) }}
@@ -150,26 +200,26 @@ export default function Lab({ chapter }) {
             HTML + CSS
           </span>
           <span>
-            {viewport === "full" ? "自适应视口" : viewport + "px 视口"} ·{" "}
-            {custom === null ? "参数模式" : "自定义 CSS"}
+            {viewport === "full" ? t.autoViewport : viewport + t.pxViewport} ·{" "}
+            {custom === null ? t.parameterMode : t.customMode}
           </span>
         </div>
       </div>
       <div className="lab-actions">
         <Button icon={<Code2 size={17} />} onClick={() => setEditor(!editor)}>
-          {editor ? "收起代码" : "编辑代码"}
+          {editor ? t.close : t.edit}
         </Button>
         <div>
-          <Tooltip title="复制完整 HTML">
+          <Tooltip title={t.copy}>
             <Button
-              aria-label="复制完整 HTML"
+              aria-label={t.copy}
               icon={<Copy size={17} />}
-              onClick={() => copyText(source)}
+              onClick={() => copyText(source, lang)}
             />
           </Tooltip>
-          <Tooltip title="下载实验">
+          <Tooltip title={t.download}>
             <Button
-              aria-label="下载实验"
+              aria-label={t.download}
               icon={<Download size={17} />}
               onClick={download}
             />
@@ -181,7 +231,7 @@ export default function Lab({ chapter }) {
           <label>
             HTML
             <textarea
-              aria-label="HTML 编辑器"
+              aria-label="HTML editor"
               value={html}
               onChange={(e) => setHtml(e.target.value)}
               spellCheck={false}
@@ -190,7 +240,7 @@ export default function Lab({ chapter }) {
           <label>
             CSS
             <textarea
-              aria-label="CSS 编辑器"
+              aria-label="CSS editor"
               value={css}
               onChange={(e) => setCustom(e.target.value)}
               spellCheck={false}

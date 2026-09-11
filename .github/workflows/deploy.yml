@@ -1,4 +1,4 @@
-name: Publish Layout Lab
+name: Publish Layout Classroom
 on:
   push:
     branches: [main]

@@ -33,7 +33,7 @@ if ($LASTEXITCODE -ne 0 -or $Branch -ne 'main') { throw 'Switch to the intended 
 Invoke-Checked 'git' @('add','--','.gitignore','package.json','package-lock.json','index.html','vite.config.js','src','public','.github','scripts','README.md','docs')
 & git diff --cached --quiet
 $DiffExit = $LASTEXITCODE
-if ($DiffExit -eq 1) { Invoke-Checked 'git' @('commit','-m','Publish Layout Lab teaching website') }
+if ($DiffExit -eq 1) { Invoke-Checked 'git' @('commit','-m','Publish Layout Classroom teaching website') }
 elseif ($DiffExit -ne 0) { throw 'Could not inspect staged changes.' }
 $Owner = & gh api user --jq '.login'
 if ($LASTEXITCODE -ne 0) { throw 'Could not determine the signed-in GitHub account.' }
